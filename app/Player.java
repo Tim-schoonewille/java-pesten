@@ -1,6 +1,7 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Player {
@@ -40,6 +41,10 @@ public class Player {
         }
         System.out.println();
 
+    }
+
+    public void sortPlayerHand() {
+        cards.sort(Comparator.comparing(Card::suit).thenComparing(Card::rank));
     }
 
     public void addCardToHand(Card card) {

@@ -333,6 +333,7 @@ public class Pesten {
             System.out.println("Current player: " + currentPlayer.getName());
             debug("All players: " + players);
             showCurrentCard();
+            currentPlayer.sortPlayerHand();
             currentPlayer.showHand();
 
             inferActionFromPlayer(currentPlayer);
