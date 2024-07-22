@@ -45,16 +45,21 @@ public record Card(Suit suit, String face, int rank) {
     }
 
     public static List<Card> getStandardDeck() {
-        List<Card> standardDeck = new ArrayList<>(52);
+        List<Card> standardDeck = new ArrayList<>();
 
         for (Suit suit : Suit.values()) {
+            if (suit == Suit.NONE)
+                continue;
             for (int i = 2; i <= 10; i++)
                 standardDeck.add(getNumericCard(suit, i));
 
             for (char c : new char[] { 'J', 'Q', 'K', 'A', })
                 standardDeck.add(getFaceCard(suit, c));
         }
-        standardDeck.addAll(Arrays.asList(getFoolCard(), getFoolCard()));
+        // standardDeck.addAll(Arrays.asList(getFoolCard(), getFoolCard()));
+        for (int i = 0; i < 2; i++) {
+            standardDeck.add(getFoolCard());
+        }
 
         return standardDeck;
     }

@@ -1,6 +1,7 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -13,7 +14,7 @@ public class Pesten {
     private Card.Suit currentSuit;
     private Scanner scanner;
     private boolean isGame;
-    private boolean debug = true;
+    private boolean debug = false;
     private boolean skipNext = false;
     private boolean reversed = false;
     private int currentPlayerIndex = 0;
@@ -130,7 +131,7 @@ public class Pesten {
         debug("Current suit" + currentSuit);
         debug("card suit: " + card.suit());
         debug("is same suit: " + (card.suit() == currentSuit));
-        if (!isValidCardToPlay(card)) {
+        if (!isValidCardToPlay(card, player)) {
             System.out.println("!!!! INVALID SUIT  OR NUMBER !!!");
             return false;
         }
@@ -171,24 +172,27 @@ public class Pesten {
         currentSuit = card.suit();
 
         switch (card.face()) {
-            case "2":
-                cardActionForFaceTwo(nextPlayer);
-                break;
-            case "7":
-                cardActionForFaceSeven(currentPlayer);
-                break;
-            case "8":
-                cardActionForFaceEight();
-                break;
-            case "A":
-                cardActionForFaceAce();
-                break;
-            case "J":
-                debug("Applying logic for J");
-                cardActionForFaceJack();
-                break;
-            default:
-                break;
+        case "2":
+            cardActionForFaceTwo(nextPlayer);
+            break;
+        case "7":
+            cardActionForFaceSeven(currentPlayer);
+            break;
+        case "8":
+            cardActionForFaceEight();
+            break;
+        case "A":
+            cardActionForFaceAce();
+            break;
+        case "J":
+            debug("Applying logic for J");
+            cardActionForFaceJack();
+            break;
+        case "F":
+            cardActionForFaceFool(nextPlayer);
+            break;
+        default:
+            break;
 
         }
     }
@@ -261,21 +265,21 @@ public class Pesten {
         }
 
         switch (choice) {
-            case 0:
-                newSuit = Card.Suit.CLUB;
-                break;
-            case 1:
-                newSuit = Card.Suit.DIAMOND;
-                break;
-            case 2:
-                newSuit = Card.Suit.HEART;
-                break;
-            case 3:
-                newSuit = Card.Suit.SPADE;
-                break;
-            default:
-                newSuit = currentSuit;
-                break;
+        case 0:
+            newSuit = Card.Suit.CLUB;
+            break;
+        case 1:
+            newSuit = Card.Suit.DIAMOND;
+            break;
+        case 2:
+            newSuit = Card.Suit.HEART;
+            break;
+        case 3:
+            newSuit = Card.Suit.SPADE;
+            break;
+        default:
+            newSuit = currentSuit;
+            break;
         }
 
         debug("Current suit is: " + currentSuit);
@@ -285,12 +289,52 @@ public class Pesten {
 
     }
 
-    private boolean isValidCardToPlay(Card card) {
+    private void cardActionForFaceFool(Player nextPlayer) {
+        debug("Deck size before removing five cards: " + deck.size());
+
+        List<Card> twoCardsForNextPlayer = new ArrayList<>(deck.subList(0, 5));
+        deck.subList(0, 5).clear();
+        debug("Deck size after removing fie cards: " + deck.size());
+        debug("total cards for next player: " + nextPlayer.getCards().size());
+        nextPlayer.addCardToHand(twoCardsForNextPlayer);
+        debug("total cards for next player after getting two: "
+                + nextPlayer.getCards().size());
+        return;
+    }
+
+    private void canNextPlayerDealCounter(Player nextPlayer) {
+        List<Card> nextPlayerCards = nextPlayer.getCards();
+
+        boolean hasCounterCard = nextPlayerCards.stream()
+                .anyMatch(card -> card.face().equals("2") || card.face().equals("F"));
+        if (hasCounterCard) {
+            skipNext = true;
+            System.out.println("next player hand:");
+            nextPlayer.showHand();
+            inferActionFromPlayer(nextPlayer);
+        }
+
+    }
+
+    private boolean isValidCardToPlay(Card card, Player player) {
         debug("is valid card to play, face: " + card.face());
         Card currentCardOnTOp = getCurrentCardOnTop();
         debug("Current card on top face: " + currentCardOnTOp.face());
         debug("Equals?" + (card.face().equalsIgnoreCase(currentCardOnTOp.face())));
-        if (card.face().equalsIgnoreCase("J"))
+
+        // check if last card is pest card
+        if (player.getCards().size() < 2) {
+            List<String> pestCards = new ArrayList<>(
+                    Arrays.asList("2", "7", "8", "J", "A", "F"));
+            if (pestCards.contains(card.face())) {
+                debug("Last card is a pest card");
+                return false;
+            }
+        }
+        if (card.face().equalsIgnoreCase("J") || card.face().equalsIgnoreCase("F"))
+            return true;
+
+        if (currentSuit == Card.Suit.NONE)
             return true;
 
         if (card.face().equals(currentCardOnTOp.face()))
@@ -323,6 +367,7 @@ public class Pesten {
         dealInitialCards(amountOfCards);
         drawInitialcard();
 
+        Card.printDeck(deck);
         while (isGame) {
             if (skipNext) {
                 skipNext = false;

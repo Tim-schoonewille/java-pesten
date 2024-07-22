@@ -10,6 +10,6 @@ public class Main {
         Pesten game = new Pesten(scanner,
                 Arrays.asList(new Player(), new Player(), new Player(), new Player()));
 
-        game.startGame(9);
+        game.startGame(10);
     }
 }
