@@ -1,14 +1,15 @@
 package app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public record Card(Suit suit, String face, int rank) {
     public enum Suit {
-        CLUB, DIAMOND, HEART, SPADE;
+        CLUB, DIAMOND, HEART, SPADE, NONE;
 
         public char getImage() {
-            return (new char[] { 9827, 9830, 9829, 9824 })[this.ordinal()];
+            return (new char[] { 9827, 9830, 9829, 9824, 9831 })[this.ordinal()];
         }
     }
 
@@ -39,6 +40,10 @@ public record Card(Suit suit, String face, int rank) {
         return new Card(suit, "" + abbrev, charIndex + 9);
     }
 
+    public static Card getFoolCard() {
+        return new Card(Suit.NONE, "F", 13);
+    }
+
     public static List<Card> getStandardDeck() {
         List<Card> standardDeck = new ArrayList<>(52);
 
@@ -49,6 +54,7 @@ public record Card(Suit suit, String face, int rank) {
             for (char c : new char[] { 'J', 'Q', 'K', 'A', })
                 standardDeck.add(getFaceCard(suit, c));
         }
+        standardDeck.addAll(Arrays.asList(getFoolCard(), getFoolCard()));
 
         return standardDeck;
     }
@@ -71,6 +77,5 @@ public record Card(Suit suit, String face, int rank) {
     public static void printDeck(List<Card> deck) {
         printDeck(deck, "Current Deck", 4);
     }
-
 
 }
